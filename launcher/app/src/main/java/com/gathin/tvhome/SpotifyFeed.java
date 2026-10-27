@@ -17,6 +17,8 @@ final class SpotifyFeed implements Feed {
     static final String PACKAGE = "com.spotify.tv.android";
     private static final int LIMIT = 4;
     /** Spotify's DJ is an algorithmic playlist with this fixed id; the API will not name it. */
+    /** Liked Songs, as the web link Spotify's TV app opens and plays. */
+    private static final String LIKED = "https://open.spotify.com/collection/tracks";
     private static final String DJ_PLAYLIST = "37i9dQZF1EYkqdzj48dyYq";
 
     private final Context context;
@@ -61,7 +63,7 @@ final class SpotifyFeed implements Feed {
                 JSONObject list = playlists.getJSONObject(i);
                 String uri = list.optString("uri", null);
                 if (list.isNull("name") || contexts.containsKey(uri)) continue;
-                out.add(new Item(list.optString("name"), context.getString(R.string.feed_playlist), image(list.optJSONArray("images")), uri));
+                out.add(new Item(list.optString("name"), context.getString(R.string.feed_playlist), image(list.optJSONArray("images")), web(uri)));
             }
         }
         // Liked Songs never turns up in the recently played data, so it is always here, second after the newest context.
@@ -78,7 +80,7 @@ final class SpotifyFeed implements Feed {
             } catch (Exception ignored) {
                 // no library permission or no network for this one: the card just has no cover
             }
-            out.add(Math.min(1, out.size()), new Item(likedName, context.getString(R.string.feed_playlist), cover, "spotify:collection:tracks"));
+            out.add(Math.min(1, out.size()), new Item(likedName, context.getString(R.string.feed_playlist), cover, LIKED));
             while (out.size() > LIMIT) out.remove(out.size() - 1);
         }
         return Result.items(out);
@@ -91,7 +93,7 @@ final class SpotifyFeed implements Feed {
         String cover = album == null ? null : image(album.optJSONArray("images"));
         String kind = part.length > 1 ? part[1] : "";
         if (part.length >= 4 && "collection".equals(part[part.length - 1])) {
-            return new Item(context.getString(R.string.feed_liked), context.getString(R.string.feed_playlist), cover, uri);
+            return new Item(context.getString(R.string.feed_liked), context.getString(R.string.feed_playlist), cover, LIKED);
         }
         if (part.length >= 5 && "playlist".equals(part[3])) kind = "playlist";
         String id = part.length > 0 ? part[part.length - 1] : "";
@@ -107,15 +109,15 @@ final class SpotifyFeed implements Feed {
                 } catch (java.io.IOException e) {
                     name = DJ_PLAYLIST.equals(id) ? "DJ" : context.getString(R.string.feed_playlist);   // Spotify's own lists are not open to the API
                 }
-                return new Item(name, context.getString(R.string.feed_playlist), art, uri);
+                return new Item(name, context.getString(R.string.feed_playlist), art, web(uri));
             }
             if ("album".equals(kind) && album != null) {
-                return new Item(album.optString("name"), context.getString(R.string.feed_album), cover, uri);
+                return new Item(album.optString("name"), context.getString(R.string.feed_album), cover, web(uri));
             }
             if ("artist".equals(kind)) {
                 JSONObject artist = new JSONObject(FeedHttp.get("https://api.spotify.com/v1/artists/" + id, token));
                 String art = image(artist.optJSONArray("images"));
-                return new Item(artist.optString("name"), context.getString(R.string.feed_artist), art != null ? art : cover, uri);
+                return new Item(artist.optString("name"), context.getString(R.string.feed_artist), art != null ? art : cover, web(uri));
             }
         } catch (Exception e) {
             return null;
@@ -134,6 +136,19 @@ final class SpotifyFeed implements Feed {
         expiresAt = System.currentTimeMillis() + json.optLong("expires_in", 3600) * 1000;
         if (json.has("refresh_token")) prefs.edit().putString("spotify_refresh_token", json.getString("refresh_token")).apply();
         return accessToken;
+    }
+
+    /**
+     * spotify:playlist:ID as https://open.spotify.com/playlist/ID. Spotify's TV app opens and plays the web form, and only
+     * lands on its home screen for the spotify: form.
+     */
+    private static String web(String uri) {
+        if (uri == null) return null;
+        String[] part = uri.split(":");
+        if (part.length >= 3 && "spotify".equals(part[0]) && !"user".equals(part[1])) return "https://open.spotify.com/" + part[1] + "/" + part[2];
+        if (part.length >= 5 && "user".equals(part[1]) && "playlist".equals(part[3])) return "https://open.spotify.com/playlist/" + part[4];
+        if (part.length >= 4 && "user".equals(part[1]) && "collection".equals(part[3])) return LIKED;
+        return null;
     }
 
     private static String artist(JSONObject track) {
