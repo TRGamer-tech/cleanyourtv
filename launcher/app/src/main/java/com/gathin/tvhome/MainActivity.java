@@ -146,6 +146,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The top shelf: heroName, plus the cinematic shelf's "Last opened" line and dock position dots. */
     private View hero;
     private TextView heroMeta;
+    private FeedRow feedRow;
+    private int feedPosition;
     private LinearLayout heroDots;
     /** Cinematic top shelf (config.xml, cinematic_home): the focused dock app's artwork behind a larger shelf. */
     private boolean cinematic;
@@ -452,6 +454,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         // shelf would render it through an offscreen buffer first, as the glow above notes.
         hero.forceHasOverlappingRendering(false);
         heroMeta = findViewById(R.id.heroMeta);
+        feedRow = new FeedRow(this, (LinearLayout) findViewById(R.id.heroFeed), new FeedRow.Navigator() {
+            @Override
+            public void down() {
+                focusTile(feedPosition);
+            }
+
+            @Override
+            public void up() {
+                firstTopButton().requestFocus();
+            }
+        });
         heroDots = findViewById(R.id.heroDots);
         heroArt = findViewById(R.id.heroArt);
         cinematic = cfg.cinematicHome;
@@ -1154,6 +1167,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onPause() {
         super.onPause();
+        feedRow.stop();
         root.removeCallbacks(showIdleClock);
         endReorder();   // Home or another app while reordering keeps the order so far
         wallpaperPlayer.stop();
@@ -1792,6 +1806,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     /** The shelf's text for this dock app: its name and, on the cinematic shelf, "Last opened" and the dots. */
     private void fillHero(int position, String label) {
         heroName.setText(label);
+        feedPosition = position;
+        feedRow.bind(adapter.packageAt(position));
         if (!cinematic) return;
         updateHeroMeta(position);
         updateHeroDots(position);
@@ -2246,6 +2262,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
 
     @Override
     public boolean onTileVerticalKey(int position, int keyCode) {
+        if (keyCode == KeyEvent.KEYCODE_DPAD_UP && (singleRow || position < COLUMNS) && feedRow.focusFirst()) {
+            grid.playSoundEffect(SoundEffectConstants.NAVIGATION_UP);
+            return true;
+        }
         int count = adapter.appCount();
         int target;
         if (singleRow) {

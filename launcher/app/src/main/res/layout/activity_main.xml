@@ -112,16 +112,32 @@
         android:orientation="vertical"
         android:alpha="0">
 
-        <TextView
-            android:id="@+id/heroName"
+        <LinearLayout
+            android:id="@+id/heroTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#FFFFFFFF"
-            android:textSize="48sp"
-            android:fontFamily="@string/font_light"
-            android:letterSpacing="-0.02"
-            android:includeFontPadding="false"
-            android:singleLine="true" />
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/heroName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFFFF"
+                android:textSize="48sp"
+                android:fontFamily="@string/font_heavy"
+                android:letterSpacing="-0.02"
+                android:includeFontPadding="false"
+                android:singleLine="true" />
+
+            <LinearLayout
+                android:id="@+id/heroFeed"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="36dp"
+                android:orientation="horizontal"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <!-- Cinematic shelf only: when the app was last opened, and the dock position dots. -->
         <TextView
@@ -203,7 +219,7 @@
                         android:format24Hour="HH:mm"
                         android:textColor="#FFFFFFFF"
                         android:textSize="52sp"
-                        android:fontFamily="@string/font_light"
+                        android:fontFamily="@string/font_heavy"
                         android:letterSpacing="-0.04"
                         android:includeFontPadding="false" />
 

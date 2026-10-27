@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base URL of your Jellyfin server (http://host:8096); empty turns the Jellyfin row off. feeds.json can set it instead. -->
+    <string name="jellyfin_server" translatable="false"></string>
+    <string name="jellyfin_link">Link Jellyfin: in a Jellyfin app open Settings, Quick Connect, and enter %1$s</string>
+    <string name="feed_error">Could not reach the server</string>
+    <string name="feed_not_linked">%1$s is not linked yet</string>
+    <string name="feed_playlist">Playlist</string>
+    <string name="feed_liked">Liked Songs</string>
+    <string name="feed_album">Album</string>
+    <string name="feed_artist">Artist</string>
+</resources>

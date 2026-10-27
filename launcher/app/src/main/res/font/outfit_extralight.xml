@@ -7,7 +7,7 @@
     <font
         android:font="@font/outfit"
         android:fontStyle="normal"
-        android:fontWeight="200"
-        android:fontVariationSettings="'wght' 200"
+        android:fontWeight="350"
+        android:fontVariationSettings="'wght' 350"
         tools:targetApi="28" />
 </font-family>

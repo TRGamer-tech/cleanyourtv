@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="jellyfin_link">Jellyfin verknüpfen: In einer Jellyfin-App Einstellungen, Quick Connect öffnen und %1$s eingeben</string>
+    <string name="feed_error">Server nicht erreichbar</string>
+    <string name="feed_not_linked">%1$s ist noch nicht verknüpft</string>
+    <string name="feed_playlist">Playlist</string>
+    <string name="feed_liked">Lieblingssongs</string>
+    <string name="feed_album">Album</string>
+    <string name="feed_artist">Künstler</string>
+</resources>
